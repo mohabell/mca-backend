@@ -2,6 +2,7 @@
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='mca-secret-key-2024-CHANGE-IN-PRODUCTION')
@@ -46,15 +47,11 @@ TEMPLATES = [{'BACKEND': 'django.template.backends.django.DjangoTemplates',
     ]}}]
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='chantier_ver11'),
-        'USER': config('DB_USER', default='postgres'),
-        'PASSWORD': config('DB_PASSWORD', default='admin'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
-    }
+    "default": dj_database_url.config(
+        default=config("DATABASE_URL")
+    )
 }
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
