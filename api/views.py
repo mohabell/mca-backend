@@ -88,14 +88,27 @@ class MeView(APIView):
         return ok(UtilisateurSerializer(request.user).data)
 
 
+# class LogoutView(APIView):
+#     def post(self, request):
+#         try:
+#             RefreshToken(request.data.get('refresh', '')).blacklist()
+#         except Exception:
+#             pass
+#         return ok(msg='Déconnexion réussie.')
+
+
+
 class LogoutView(APIView):
     def post(self, request):
         try:
             RefreshToken(request.data.get('refresh', '')).blacklist()
         except Exception:
             pass
+        # حذف FCM Token عند تسجيل الخروج
+        request.user.fcm_token = ''
+        request.user.save(update_fields=['fcm_token'])
+        
         return ok(msg='Déconnexion réussie.')
-
 
 # ══════════════════════════════════════════════════════
 # UTILISATEURS  (Admin seulement)
@@ -1277,13 +1290,35 @@ class ProfilUpdateView(APIView):
 # FCM TOKEN
 # ══════════════════════════════════════════════════════
 
+# class EnregistrerFCMTokenView(APIView):
+#     def post(self, request):
+#         token = request.data.get('fcm_token', '').strip()
+#         if not token:
+#             return Response({'success': False, 'message': 'Token manquant.'}, status=400)
+#         request.user.fcm_token = token
+#         request.user.save(update_fields=['fcm_token'])
+#         return ok(msg='Token FCM enregistré.')
+
+
 class EnregistrerFCMTokenView(APIView):
     def post(self, request):
         token = request.data.get('fcm_token', '').strip()
+
         if not token:
-            return Response({'success': False, 'message': 'Token manquant.'}, status=400)
+            return Response(
+                {'success': False, 'message': 'Token manquant.'},
+                status=400,
+            )
+
+        # حذف نفس الـ token من أي مستخدم آخر
+        Utilisateur.objects.filter(fcm_token=token).exclude(pk=request.user.pk).update(
+            fcm_token=''
+        )
+
+        # تسجيله عند المستخدم الحالي فقط
         request.user.fcm_token = token
         request.user.save(update_fields=['fcm_token'])
+
         return ok(msg='Token FCM enregistré.')
 
 
