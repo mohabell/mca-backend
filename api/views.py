@@ -1154,9 +1154,12 @@ class RapportDetailView(APIView):
             return not_found()
         if r.fichier:
             try:
-                import os
-                if os.path.isfile(r.fichier.path):
-                    os.remove(r.fichier.path)
+                r.fichier.delete(save=False)
+            except Exception:
+                pass
+        for rf in r.attachments.all():
+            try:
+                rf.fichier.delete(save=False)
             except Exception:
                 pass
         r.delete()
@@ -1237,9 +1240,7 @@ class FactureDetailView(APIView):
         if 'fichier' in request.FILES:
             if f.fichier:
                 try:
-                    import os
-                    if os.path.isfile(f.fichier.path):
-                        os.remove(f.fichier.path)
+                    f.fichier.delete(save=False)
                 except Exception:
                     pass
             f.fichier = request.FILES['fichier']
@@ -1260,9 +1261,7 @@ class FactureDetailView(APIView):
 
         if f.fichier:
             try:
-                import os
-                if os.path.isfile(f.fichier.path):
-                    os.remove(f.fichier.path)
+                f.fichier.delete(save=False)
             except Exception:
                 pass
 

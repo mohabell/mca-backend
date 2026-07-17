@@ -292,9 +292,7 @@ class Rapport(models.Model):
         """Remplace le document existant (ModifierDoc UML)"""
         if self.fichier:
             try:
-                import os
-                if os.path.isfile(self.fichier.path):
-                    os.remove(self.fichier.path)
+                self.fichier.delete(save=False)
             except Exception:
                 pass
         self.fichier = fichier_file

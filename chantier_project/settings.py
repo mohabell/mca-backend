@@ -90,22 +90,21 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ── Cloudinary media storage (production) ──────────────────────────
-# In production (DEBUG=False), uploaded files are stored on Cloudinary
-# so they survive Railway container restarts and are served via CDN.
-# Set these three env vars in Railway dashboard:
-#   CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
+# django-cloudinary-storage requires CLOUDINARY_STORAGE dict to be
+# present before the app registry initialises — it cannot be set
+# inside a conditional block that runs after INSTALLED_APPS is read.
 CLOUDINARY_CLOUD_NAME = config('CLOUDINARY_CLOUD_NAME', default='')
 CLOUDINARY_API_KEY    = config('CLOUDINARY_API_KEY',    default='')
 CLOUDINARY_API_SECRET = config('CLOUDINARY_API_SECRET', default='')
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
+    'API_KEY':    CLOUDINARY_API_KEY,
+    'API_SECRET': CLOUDINARY_API_SECRET,
+    'SECURE':     True,
+}
+
 if not DEBUG and CLOUDINARY_CLOUD_NAME:
-    import cloudinary
-    cloudinary.config(
-        cloud_name = CLOUDINARY_CLOUD_NAME,
-        api_key    = CLOUDINARY_API_KEY,
-        api_secret = CLOUDINARY_API_SECRET,
-        secure     = True,
-    )
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
     MEDIA_URL = f'https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/'
 
