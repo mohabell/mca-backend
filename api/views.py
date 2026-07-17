@@ -1079,7 +1079,22 @@ class RapportListView(APIView):
             else:
                 return forbidden()
             rapports = Rapport.objects.filter(chantier_id__in=ids)
-        return ok(RapportSerializer(rapports, many=True, context={'request': request}).data)
+        serializer = RapportSerializer(rapports, many=True, context={'request': request})
+        data = serializer.data
+        # ── DEBUG: trace URL at every layer ──────────────────
+        for item in data:
+            raw_fichier = None
+            try:
+                rapport_obj = rapports.get(pk=item['id'])
+                raw_fichier = rapport_obj.fichier.url if rapport_obj.fichier else None
+            except Exception as e:
+                raw_fichier = f'ERROR: {e}'
+            print(f'[DEBUG][rapport {item["id"]}] model.fichier.url = {raw_fichier}')
+            print(f'[DEBUG][rapport {item["id"]}] serializer fichier = {item["fichier"]}')
+            for f in item.get('fichiers', []):
+                print(f'[DEBUG][rapport {item["id"]}] attachment fichier = {f["fichier"]}')
+        # ─────────────────────────────────────────────────────
+        return ok(data)
 
     def post(self, request):
         user        = request.user
