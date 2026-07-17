@@ -154,6 +154,9 @@ class RapportFileSerializer(serializers.ModelSerializer):
     def get_fichier(self, obj):
         if not obj.fichier:
             return None
+        print('=== RapportFile DEBUG ===')
+        print('name:', obj.fichier.name)
+        print('url :', obj.fichier.url)
         url = obj.fichier.url
         if url.startswith('http://') or url.startswith('https://'):
             return url
