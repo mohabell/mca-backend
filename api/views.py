@@ -1079,7 +1079,7 @@ class RapportListView(APIView):
             else:
                 return forbidden()
             rapports = Rapport.objects.filter(chantier_id__in=ids)
-        return ok(RapportSerializer(rapports, many=True).data)
+        return ok(RapportSerializer(rapports, many=True, context={'request': request}).data)
 
     def post(self, request):
         user        = request.user
@@ -1113,7 +1113,7 @@ class RapportListView(APIView):
                 f'📋 Nouveau rapport : {rapport.titre}',
                 f'{user.get_nom_complet()} a créé un rapport pour le chantier "{chantier.nom}".'
             )
-        return ok(RapportSerializer(rapport).data, 'Rapport créé.', 201)
+        return ok(RapportSerializer(rapport, context={'request': request}).data, 'Rapport créé.', 201)
 
 
 class RapportDetailView(APIView):
@@ -1143,7 +1143,7 @@ class RapportDetailView(APIView):
         for f in attached_files:
             RapportFile.objects.create(rapport=rapport, fichier=f)
 
-        return ok(RapportSerializer(rapport).data, 'Rapport mis à jour.')
+        return ok(RapportSerializer(rapport, context={'request': request}).data, 'Rapport mis à jour.')
 
     def delete(self, request, pk):
         if not request.user.is_admin:

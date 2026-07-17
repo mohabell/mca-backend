@@ -145,25 +145,41 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 
 class RapportFileSerializer(serializers.ModelSerializer):
+    fichier = serializers.SerializerMethodField()
+
     class Meta:
         model = RapportFile
         fields = ['id', 'fichier', 'fichier_nom', 'date_creation']
+
+    def get_fichier(self, obj):
+        request = self.context.get('request')
+        if obj.fichier and request:
+            return request.build_absolute_uri(obj.fichier.url)
+        if obj.fichier:
+            return obj.fichier.url
+        return None
 
 
 # ── Rapport ───────────────────────────────────────────────────────
 class RapportSerializer(serializers.ModelSerializer):
     chantier_nom = serializers.CharField(source='chantier.nom', read_only=True)
     cree_par_nom = serializers.CharField(source='cree_par.get_nom_complet', read_only=True)
-    # ── NOUVEAU : fichier joint ──────────────────────────
-    fichier      = serializers.FileField(required=False, allow_null=True)
+    fichier      = serializers.SerializerMethodField()
     fichier_nom  = serializers.SerializerMethodField()
-    # ── MULTIPLES FICHIERS ───────────────────────────────
     fichiers     = RapportFileSerializer(source='attachments', many=True, read_only=True)
 
     class Meta:
         model  = Rapport
         fields = ['id', 'chantier', 'chantier_nom', 'titre', 'contenu',
                   'cree_par_nom', 'date_creation', 'fichier', 'fichier_nom', 'fichiers']
+
+    def get_fichier(self, obj):
+        request = self.context.get('request')
+        if obj.fichier and request:
+            return request.build_absolute_uri(obj.fichier.url)
+        if obj.fichier:
+            return obj.fichier.url
+        return None
 
     def get_fichier_nom(self, obj):
         return obj.fichier_nom
