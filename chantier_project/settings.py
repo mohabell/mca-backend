@@ -21,6 +21,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
@@ -86,6 +88,26 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Cloudinary media storage (production) ──────────────────────────
+# In production (DEBUG=False), uploaded files are stored on Cloudinary
+# so they survive Railway container restarts and are served via CDN.
+# Set these three env vars in Railway dashboard:
+#   CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
+CLOUDINARY_CLOUD_NAME = config('CLOUDINARY_CLOUD_NAME', default='')
+CLOUDINARY_API_KEY    = config('CLOUDINARY_API_KEY',    default='')
+CLOUDINARY_API_SECRET = config('CLOUDINARY_API_SECRET', default='')
+
+if not DEBUG and CLOUDINARY_CLOUD_NAME:
+    import cloudinary
+    cloudinary.config(
+        cloud_name = CLOUDINARY_CLOUD_NAME,
+        api_key    = CLOUDINARY_API_KEY,
+        api_secret = CLOUDINARY_API_SECRET,
+        secure     = True,
+    )
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    MEDIA_URL = f'https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/'
 
 # Rate limiting for authentication
 REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = [

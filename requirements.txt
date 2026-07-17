@@ -9,8 +9,10 @@ google-auth>=2.18
 # ── Génération PDF bulletins de paie ──
 reportlab>=4.0
 
-# ── Optionnel (alternative à reportlab) ──
-# weasyprint>=60.0
+# ── Stockage fichiers media (production) ──
+cloudinary>=1.36
+django-cloudinary-storage>=0.3.0
+
 gunicorn>=23.0
 whitenoise>=6.7
 psycopg2-binary>=2.9
