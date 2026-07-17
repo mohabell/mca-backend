@@ -152,12 +152,13 @@ class RapportFileSerializer(serializers.ModelSerializer):
         fields = ['id', 'fichier', 'fichier_nom', 'date_creation']
 
     def get_fichier(self, obj):
+        if not obj.fichier:
+            return None
+        url = obj.fichier.url
+        if url.startswith('http://') or url.startswith('https://'):
+            return url
         request = self.context.get('request')
-        if obj.fichier and request:
-            return request.build_absolute_uri(obj.fichier.url)
-        if obj.fichier:
-            return obj.fichier.url
-        return None
+        return request.build_absolute_uri(url) if request else url
 
 
 # ── Rapport ───────────────────────────────────────────────────────
@@ -174,12 +175,13 @@ class RapportSerializer(serializers.ModelSerializer):
                   'cree_par_nom', 'date_creation', 'fichier', 'fichier_nom', 'fichiers']
 
     def get_fichier(self, obj):
+        if not obj.fichier:
+            return None
+        url = obj.fichier.url
+        if url.startswith('http://') or url.startswith('https://'):
+            return url
         request = self.context.get('request')
-        if obj.fichier and request:
-            return request.build_absolute_uri(obj.fichier.url)
-        if obj.fichier:
-            return obj.fichier.url
-        return None
+        return request.build_absolute_uri(url) if request else url
 
     def get_fichier_nom(self, obj):
         return obj.fichier_nom
